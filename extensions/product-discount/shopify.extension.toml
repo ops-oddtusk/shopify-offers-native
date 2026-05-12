@@ -4,7 +4,7 @@ type = "function"
 handle = "offer-product-discount"
 
 [build]
-command = ""
+command = "javy compile src/run.js -o dist/function.wasm"
 path = "dist/function.wasm"
 
 [[targeting]]
