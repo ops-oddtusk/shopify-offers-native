@@ -1,0 +1,153 @@
+{% comment %} Cart Progress Bar — Shows spending progress toward a reward (free shipping, gift, etc.) {% endcomment %}
+
+{% if block.settings.goal_amount != blank %}
+  {% assign progress_msg = block.settings.message_before | default: 'Spend REMAINING more for free shipping!' %}
+  {% assign success_msg = block.settings.message_after | default: 'You unlocked free shipping!' %}
+
+  <div id="oe-cart-progress" style="margin: 16px 0;">
+    {% if block.settings.badge_text != blank %}
+      <span style="
+        display: inline-block;
+        background: {{ block.settings.badge_color }};
+        color: #fff;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      ">{{ block.settings.badge_text }}</span>
+    {% endif %}
+
+    <div style="
+      background: {{ block.settings.track_color }};
+      border-radius: 20px;
+      height: 12px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    ">
+      <div id="oe-progress-fill" style="
+        background: {{ block.settings.fill_color }};
+        height: 100%;
+        width: 0%;
+        border-radius: 20px;
+        transition: width 0.5s ease;
+      "></div>
+    </div>
+
+    <p id="oe-progress-text" style="
+      margin: 0;
+      font-size: 14px;
+      color: {{ block.settings.text_color }};
+    "></p>
+  </div>
+
+  <script>
+    (function() {
+      var goal = parseFloat('{{ block.settings.goal_amount }}') || 100;
+      var msgBefore = {{ progress_msg | json }};
+      var msgAfter = {{ success_msg | json }};
+      var fillEl = document.getElementById('oe-progress-fill');
+      var textEl = document.getElementById('oe-progress-text');
+
+      function formatMoney(cents) {
+        return '$' + (cents / 100).toFixed(2);
+      }
+
+      function update() {
+        fetch('/cart.js')
+          .then(function(r) { return r.json(); })
+          .then(function(cart) {
+            var total = cart.total_price;
+            var goalCents = goal * 100;
+            var pct = Math.min((total / goalCents) * 100, 100);
+            fillEl.style.width = pct + '%';
+
+            if (total >= goalCents) {
+              textEl.textContent = msgAfter;
+              textEl.style.fontWeight = '700';
+            } else {
+              var remaining = formatMoney(goalCents - total);
+              textEl.textContent = msgBefore.replace('REMAINING', remaining);
+              textEl.style.fontWeight = '400';
+            }
+          })
+          .catch(function() {});
+      }
+
+      update();
+
+      var origFetch = window.fetch;
+      window.fetch = function() {
+        var result = origFetch.apply(this, arguments);
+        if (arguments[0] && (typeof arguments[0] === 'string') && (arguments[0].indexOf('/cart') > -1)) {
+          setTimeout(update, 500);
+        }
+        return result;
+      };
+    })();
+  </script>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Cart Progress Bar",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "goal_amount",
+      "label": "Goal Amount ($)",
+      "default": "100",
+      "info": "Cart total needed to unlock the reward (in dollars)"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "FREE SHIPPING"
+    },
+    {
+      "type": "text",
+      "id": "message_before",
+      "label": "Progress Message",
+      "default": "Spend REMAINING more for free shipping!",
+      "info": "Use the word REMAINING where the dollar amount should appear"
+    },
+    {
+      "type": "text",
+      "id": "message_after",
+      "label": "Success Message",
+      "default": "You unlocked free shipping!"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "track_color",
+      "label": "Track Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "color",
+      "id": "fill_color",
+      "label": "Fill Color",
+      "default": "#059669"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#374151"
+    },
+    {
+      "type": "color",
+      "id": "badge_color",
+      "label": "Badge Color",
+      "default": "#059669"
+    }
+  ]
+}
+{% endschema %}

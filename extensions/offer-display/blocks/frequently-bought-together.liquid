@@ -1,0 +1,166 @@
+{% comment %} Frequently Bought Together — Displays grouped product recommendations {% endcomment %}
+
+{% if block.settings.heading != blank %}
+  <div style="margin: 24px 0; padding: 20px; border: 1px solid {{ block.settings.border_color }}; border-radius: 12px;">
+
+    <h3 style="margin: 0 0 16px; font-size: 18px; font-weight: 700; color: {{ block.settings.title_color }};">
+      {{ block.settings.heading }}
+    </h3>
+
+    {% if block.settings.products != blank %}
+      <div style="
+        display: grid;
+        grid-template-columns: repeat({{ block.settings.columns | default: 3 }}, 1fr);
+        gap: 16px;
+        margin-bottom: 16px;
+      ">
+        {% for product in block.settings.products %}
+          <div style="text-align: center;">
+            {% if product.featured_image %}
+              <img
+                src="{{ product.featured_image | image_url: width: 250 }}"
+                alt="{{ product.title }}"
+                width="250"
+                height="250"
+                loading="lazy"
+                style="width: 100%; height: auto; border-radius: 8px; margin-bottom: 8px;"
+              >
+            {% endif %}
+            <p style="margin: 0 0 2px; font-size: 14px; font-weight: 500;">{{ product.title }}</p>
+            <p style="margin: 0; font-size: 13px; color: #6b7280;">{{ product.price | money }}</p>
+          </div>
+          {% unless forloop.last %}
+            {% comment %} Visual "+" separator between products {% endcomment %}
+          {% endunless %}
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div style="background: #f9fafb; border-radius: 8px; padding: 12px; margin-bottom: 12px;">
+      {% if block.settings.original_price != blank %}
+        <div style="display: flex; justify-content: space-between; font-size: 14px; color: #6b7280; margin-bottom: 4px;">
+          <span>Regular Total:</span>
+          <span style="text-decoration: line-through;">{{ block.settings.original_price }}</span>
+        </div>
+      {% endif %}
+      {% if block.settings.bundle_price != blank %}
+        <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 700;">
+          <span>Bundle Price:</span>
+          <span style="color: {{ block.settings.highlight_color }};">{{ block.settings.bundle_price }}</span>
+        </div>
+      {% endif %}
+      {% if block.settings.savings_text != blank %}
+        <div style="text-align: right; margin-top: 4px; font-size: 13px; font-weight: 600; color: #059669;">
+          {{ block.settings.savings_text }}
+        </div>
+      {% endif %}
+    </div>
+
+    {% if block.settings.cta_link != blank %}
+      <a href="{{ block.settings.cta_link }}" style="
+        display: block;
+        text-align: center;
+        background: {{ block.settings.btn_bg }};
+        color: {{ block.settings.btn_text }};
+        padding: 12px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 15px;
+      ">{{ block.settings.cta_text | default: "Buy Together & Save" }}</a>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Bought Together",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Frequently Bought Together"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Products",
+      "limit": 5
+    },
+    {
+      "type": "range",
+      "id": "columns",
+      "label": "Products Per Row",
+      "min": 2,
+      "max": 4,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "original_price",
+      "label": "Original Total Price",
+      "info": "e.g. $150.00"
+    },
+    {
+      "type": "text",
+      "id": "bundle_price",
+      "label": "Bundle Price",
+      "info": "e.g. $120.00"
+    },
+    {
+      "type": "text",
+      "id": "savings_text",
+      "label": "Savings Text",
+      "default": "You save $30.00!"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button Text",
+      "default": "Buy Together & Save"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Price Highlight",
+      "default": "#059669"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg",
+      "label": "Button Background",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "btn_text",
+      "label": "Button Text Color",
+      "default": "#ffffff"
+    }
+  ]
+}
+{% endschema %}

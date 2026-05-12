@@ -1,0 +1,13 @@
+{
+  "extension": {
+    "name": "Offers & Bundles Display"
+  },
+  "blocks": {
+    "product-offer-banner": { "name": "Product Page Offer Banner" },
+    "bundle-card": { "name": "Bundle Card" },
+    "offer-badge": { "name": "Offer Badge" },
+    "volume-discount-table": { "name": "Volume Discount Table" },
+    "frequently-bought-together": { "name": "Bought Together" },
+    "cart-progress-bar": { "name": "Cart Progress Bar" }
+  }
+}

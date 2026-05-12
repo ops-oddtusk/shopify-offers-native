@@ -1,0 +1,218 @@
+{% comment %} Volume Discount Table — Shows tiered pricing on product pages {% endcomment %}
+
+{% if block.settings.title != blank %}
+  <div style="margin: 16px 0;">
+    {% if block.settings.badge_text != blank %}
+      <span style="
+        display: inline-block;
+        background: {{ block.settings.badge_color }};
+        color: #fff;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      ">{{ block.settings.badge_text }}</span>
+    {% endif %}
+
+    <div style="font-weight: 600; margin-bottom: 8px; color: {{ block.settings.title_color }}; font-size: 16px;">
+      {{ block.settings.title }}
+    </div>
+
+    <table style="
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid {{ block.settings.border_color }};
+      border-radius: 8px;
+      overflow: hidden;
+      font-size: 14px;
+    ">
+      <thead>
+        <tr style="background: {{ block.settings.header_bg }}; color: {{ block.settings.header_text }};">
+          <th style="padding: 10px 12px; text-align: left;">Quantity</th>
+          <th style="padding: 10px 12px; text-align: left;">Discount</th>
+          <th style="padding: 10px 12px; text-align: left;">{{ block.settings.savings_label | default: "You Save" }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if block.settings.tier1_qty != blank %}
+          <tr style="border-top: 1px solid {{ block.settings.border_color }};">
+            <td style="padding: 10px 12px;">{{ block.settings.tier1_qty }}+</td>
+            <td style="padding: 10px 12px; font-weight: 600;">{{ block.settings.tier1_discount }}</td>
+            <td style="padding: 10px 12px; font-weight: 600; color: {{ block.settings.savings_color }};">{{ block.settings.tier1_savings }}</td>
+          </tr>
+        {% endif %}
+        {% if block.settings.tier2_qty != blank %}
+          <tr style="border-top: 1px solid {{ block.settings.border_color }};">
+            <td style="padding: 10px 12px;">{{ block.settings.tier2_qty }}+</td>
+            <td style="padding: 10px 12px; font-weight: 600;">{{ block.settings.tier2_discount }}</td>
+            <td style="padding: 10px 12px; font-weight: 600; color: {{ block.settings.savings_color }};">{{ block.settings.tier2_savings }}</td>
+          </tr>
+        {% endif %}
+        {% if block.settings.tier3_qty != blank %}
+          <tr style="border-top: 1px solid {{ block.settings.border_color }};">
+            <td style="padding: 10px 12px;">{{ block.settings.tier3_qty }}+</td>
+            <td style="padding: 10px 12px; font-weight: 600;">{{ block.settings.tier3_discount }}</td>
+            <td style="padding: 10px 12px; font-weight: 600; color: {{ block.settings.savings_color }};">{{ block.settings.tier3_savings }}</td>
+          </tr>
+        {% endif %}
+        {% if block.settings.tier4_qty != blank %}
+          <tr style="border-top: 1px solid {{ block.settings.border_color }};">
+            <td style="padding: 10px 12px;">{{ block.settings.tier4_qty }}+</td>
+            <td style="padding: 10px 12px; font-weight: 600;">{{ block.settings.tier4_discount }}</td>
+            <td style="padding: 10px 12px; font-weight: 600; color: {{ block.settings.savings_color }};">{{ block.settings.tier4_savings }}</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Volume Discount Table",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Table Title",
+      "default": "Buy More, Save More"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text"
+    },
+    {
+      "type": "text",
+      "id": "savings_label",
+      "label": "Savings Column Header",
+      "default": "You Save"
+    },
+    {
+      "type": "header",
+      "content": "Tier 1"
+    },
+    {
+      "type": "text",
+      "id": "tier1_qty",
+      "label": "Minimum Quantity",
+      "default": "2"
+    },
+    {
+      "type": "text",
+      "id": "tier1_discount",
+      "label": "Discount",
+      "default": "10% off"
+    },
+    {
+      "type": "text",
+      "id": "tier1_savings",
+      "label": "Savings Display",
+      "default": "$5.00"
+    },
+    {
+      "type": "header",
+      "content": "Tier 2"
+    },
+    {
+      "type": "text",
+      "id": "tier2_qty",
+      "label": "Minimum Quantity",
+      "default": "5"
+    },
+    {
+      "type": "text",
+      "id": "tier2_discount",
+      "label": "Discount",
+      "default": "15% off"
+    },
+    {
+      "type": "text",
+      "id": "tier2_savings",
+      "label": "Savings Display",
+      "default": "$15.00"
+    },
+    {
+      "type": "header",
+      "content": "Tier 3"
+    },
+    {
+      "type": "text",
+      "id": "tier3_qty",
+      "label": "Minimum Quantity"
+    },
+    {
+      "type": "text",
+      "id": "tier3_discount",
+      "label": "Discount"
+    },
+    {
+      "type": "text",
+      "id": "tier3_savings",
+      "label": "Savings Display"
+    },
+    {
+      "type": "header",
+      "content": "Tier 4"
+    },
+    {
+      "type": "text",
+      "id": "tier4_qty",
+      "label": "Minimum Quantity"
+    },
+    {
+      "type": "text",
+      "id": "tier4_discount",
+      "label": "Discount"
+    },
+    {
+      "type": "text",
+      "id": "tier4_savings",
+      "label": "Savings Display"
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "header_bg",
+      "label": "Header Background",
+      "default": "#f3f4f6"
+    },
+    {
+      "type": "color",
+      "id": "header_text",
+      "label": "Header Text Color",
+      "default": "#374151"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "color",
+      "id": "savings_color",
+      "label": "Savings Color",
+      "default": "#059669"
+    },
+    {
+      "type": "color",
+      "id": "badge_color",
+      "label": "Badge Color",
+      "default": "#059669"
+    }
+  ]
+}
+{% endschema %}

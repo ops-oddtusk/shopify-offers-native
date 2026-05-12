@@ -1,0 +1,147 @@
+{% comment %} Product Offer Banner — Displays a promotional banner on product pages {% endcomment %}
+
+{% if block.settings.title != blank %}
+  <div class="oe-product-banner" style="
+    background: {{ block.settings.bg_color }};
+    color: {{ block.settings.text_color }};
+    padding: 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    position: relative;
+  ">
+    {% if block.settings.badge_text != blank %}
+      <span style="
+        background: {{ block.settings.badge_color }};
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-bottom: 8px;
+      ">{{ block.settings.badge_text }}</span>
+    {% endif %}
+
+    <h3 style="margin: 0 0 4px; font-size: 18px; font-weight: 700;">{{ block.settings.title }}</h3>
+
+    {% if block.settings.description != blank %}
+      <p style="margin: 0 0 8px; opacity: 0.85; font-size: 14px;">{{ block.settings.description }}</p>
+    {% endif %}
+
+    {% if block.settings.discount_text != blank %}
+      <span style="
+        font-size: 22px;
+        font-weight: 800;
+        color: {{ block.settings.highlight_color }};
+      ">{{ block.settings.discount_text }}</span>
+    {% endif %}
+
+    {% if block.settings.end_date != blank %}
+      <div class="oe-countdown" data-end="{{ block.settings.end_date }}" style="margin-top: 8px; font-size: 13px; opacity: 0.8;">
+        <span class="oe-cd-label">Ends in: </span>
+        <span class="oe-cd-value"></span>
+      </div>
+      <script>
+        (function(){
+          var el = document.querySelector('.oe-countdown[data-end="{{ block.settings.end_date }}"]');
+          if (!el) return;
+          var end = new Date(el.dataset.end).getTime();
+          var val = el.querySelector('.oe-cd-value');
+          function tick(){
+            var d = end - Date.now();
+            if (d < 0) { val.textContent = 'Expired'; return; }
+            var days = Math.floor(d/86400000);
+            var hrs = Math.floor((d%86400000)/3600000);
+            var mins = Math.floor((d%3600000)/60000);
+            val.textContent = days+'d '+hrs+'h '+mins+'m';
+          }
+          tick(); setInterval(tick, 60000);
+        })();
+      </script>
+    {% endif %}
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Product Offer Banner",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Offer Title",
+      "default": "Special Offer"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Offer Description"
+    },
+    {
+      "type": "text",
+      "id": "discount_text",
+      "label": "Discount Display Text",
+      "default": "20% OFF",
+      "info": "e.g. 20% OFF, Buy 2 Get 1, $10 off"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "SALE"
+    },
+    {
+      "type": "text",
+      "id": "end_date",
+      "label": "End Date (YYYY-MM-DD)",
+      "info": "Leave blank for no countdown"
+    },
+    {
+      "type": "select",
+      "id": "offer_type",
+      "label": "Offer Type",
+      "options": [
+        { "value": "percentage", "label": "Percentage Off" },
+        { "value": "fixed", "label": "Fixed Amount Off" },
+        { "value": "bogo", "label": "Buy One Get One" },
+        { "value": "buy_x_get_y", "label": "Buy X Get Y" },
+        { "value": "volume", "label": "Volume / Tiered" },
+        { "value": "quantity_breaks", "label": "Quantity Breaks" },
+        { "value": "free_gift", "label": "Free Gift" },
+        { "value": "spend_save", "label": "Spend X Save Y" },
+        { "value": "product_bundle", "label": "Product Bundle" },
+        { "value": "collection_bundle", "label": "Collection Bundle" },
+        { "value": "mix_match", "label": "Mix & Match" },
+        { "value": "min_quantity", "label": "Minimum Quantity" }
+      ],
+      "default": "percentage"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#1a1a2e"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Discount Highlight Color",
+      "default": "#e94560"
+    },
+    {
+      "type": "color",
+      "id": "badge_color",
+      "label": "Badge Color",
+      "default": "#e94560"
+    }
+  ]
+}
+{% endschema %}

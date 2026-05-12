@@ -1,0 +1,20 @@
+{
+  "name": "shopify-offers-bundles-native",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shopify-native offers & bundles display app with checkout banner.",
+  "workspaces": [
+    "extensions/checkout-banner"
+  ],
+  "scripts": {
+    "deploy": "shopify app deploy",
+    "dev": "shopify app dev",
+    "setup:metaobjects": "node scripts/setup-metaobjects.js"
+  },
+  "dependencies": {
+    "@shopify/shopify-api": "^11.4.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

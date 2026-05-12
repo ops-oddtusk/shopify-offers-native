@@ -1,0 +1,182 @@
+{% comment %} Bundle Card — Displays a product bundle offer {% endcomment %}
+
+{% if block.settings.title != blank %}
+  <div style="
+    border: 1px solid {{ block.settings.border_color }};
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 16px 0;
+  ">
+    <div style="
+      background: {{ block.settings.header_bg }};
+      color: {{ block.settings.header_text }};
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    ">
+      <h3 style="margin: 0; font-size: 16px; font-weight: 700;">{{ block.settings.title }}</h3>
+      {% if block.settings.badge_text != blank %}
+        <span style="
+          background: {{ block.settings.badge_color }};
+          color: #fff;
+          padding: 3px 8px;
+          border-radius: 4px;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+        ">{{ block.settings.badge_text }}</span>
+      {% endif %}
+    </div>
+
+    <div style="padding: 16px;">
+      {% if block.settings.description != blank %}
+        <p style="margin: 0 0 12px; color: #6b7280; font-size: 14px;">{{ block.settings.description }}</p>
+      {% endif %}
+
+      {% if block.settings.products != blank %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-bottom: 16px;">
+          {% for product in block.settings.products %}
+            <div style="text-align: center;">
+              {% if product.featured_image %}
+                <img src="{{ product.featured_image | image_url: width: 150 }}" alt="{{ product.title }}" width="150" height="150" loading="lazy" style="width: 100%; height: auto; border-radius: 6px; margin-bottom: 6px;">
+              {% endif %}
+              <p style="margin: 0; font-size: 13px; font-weight: 500;">{{ product.title }}</p>
+              <p style="margin: 2px 0 0; font-size: 12px; color: #9ca3af;">{{ product.price | money }}</p>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div style="
+        background: #f9fafb;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 12px;
+      ">
+        {% if block.settings.original_price != blank %}
+          <div style="display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 14px; color: #6b7280;">
+            <span>Regular Price:</span>
+            <span style="text-decoration: line-through;">{{ block.settings.original_price }}</span>
+          </div>
+        {% endif %}
+        {% if block.settings.bundle_price != blank %}
+          <div style="display: flex; justify-content: space-between; font-size: 16px; font-weight: 700;">
+            <span>Bundle Price:</span>
+            <span style="color: {{ block.settings.highlight_color }};">{{ block.settings.bundle_price }}</span>
+          </div>
+        {% endif %}
+        {% if block.settings.savings_text != blank %}
+          <div style="text-align: right; margin-top: 4px; font-size: 13px; font-weight: 600; color: #059669;">
+            {{ block.settings.savings_text }}
+          </div>
+        {% endif %}
+      </div>
+
+      {% if block.settings.cta_link != blank %}
+        <a href="{{ block.settings.cta_link }}" style="
+          display: block;
+          text-align: center;
+          background: {{ block.settings.header_bg }};
+          color: {{ block.settings.header_text }};
+          padding: 12px;
+          border-radius: 8px;
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 15px;
+        ">{{ block.settings.cta_text | default: "Add Bundle to Cart" }}</a>
+      {% endif %}
+    </div>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Bundle Card",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Bundle Title",
+      "default": "Bundle & Save"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Bundle Description"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "SAVE 15%"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Bundle Products",
+      "limit": 6
+    },
+    {
+      "type": "text",
+      "id": "original_price",
+      "label": "Original Total Price",
+      "info": "e.g. $120.00"
+    },
+    {
+      "type": "text",
+      "id": "bundle_price",
+      "label": "Bundle Price",
+      "info": "e.g. $99.00"
+    },
+    {
+      "type": "text",
+      "id": "savings_text",
+      "label": "Savings Text",
+      "default": "You save $21.00!"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button Text",
+      "default": "Add Bundle to Cart"
+    },
+    {
+      "type": "url",
+      "id": "cta_link",
+      "label": "Button Link"
+    },
+    {
+      "type": "color",
+      "id": "header_bg",
+      "label": "Header Background",
+      "default": "#111827"
+    },
+    {
+      "type": "color",
+      "id": "header_text",
+      "label": "Header Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#e5e7eb"
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Price Highlight Color",
+      "default": "#059669"
+    },
+    {
+      "type": "color",
+      "id": "badge_color",
+      "label": "Badge Color",
+      "default": "#e94560"
+    }
+  ]
+}
+{% endschema %}

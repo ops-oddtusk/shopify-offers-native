@@ -1,0 +1,31 @@
+query RunInput {
+  cart {
+    lines {
+      id
+      quantity
+      merchandise {
+        ... on ProductVariant {
+          id
+          product {
+            id
+            handle
+            hasAnyTag(tags: ["offer-discount"])
+          }
+          price {
+            amount
+            currencyCode
+          }
+          compareAtPrice {
+            amount
+            currencyCode
+          }
+        }
+      }
+    }
+  }
+  discountNode {
+    metafield(namespace: "offer-config", key: "settings") {
+      value
+    }
+  }
+}

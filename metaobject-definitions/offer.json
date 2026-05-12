@@ -1,0 +1,340 @@
+{
+  "definition": {
+    "name": "Offer",
+    "type": "app_offer",
+    "description": "Discount offers, BOGO deals, bundles, and promotional campaigns",
+    "fieldDefinitions": [
+      {
+        "name": "Title",
+        "key": "title",
+        "type": "single_line_text_field",
+        "required": true,
+        "description": "Display name of the offer (e.g., 'Summer BOGO Sale')"
+      },
+      {
+        "name": "Description",
+        "key": "description",
+        "type": "multi_line_text_field",
+        "required": false,
+        "description": "Internal description or customer-facing details"
+      },
+      {
+        "name": "Offer Type",
+        "key": "offer_type",
+        "type": "single_line_text_field",
+        "required": true,
+        "description": "BOGO | BUY_X_GET_Y | PERCENTAGE_OFF | FIXED_AMOUNT | PRODUCT_BUNDLE | COLLECTION_BUNDLE | VOLUME_TIERED | FREE_GIFT | SPEND_X_SAVE_Y | MIX_AND_MATCH | QUANTITY_BREAKS | MIN_QUANTITY",
+        "validations": [
+          {
+            "name": "choices",
+            "value": "[\"BOGO\",\"BUY_X_GET_Y\",\"PERCENTAGE_OFF\",\"FIXED_AMOUNT\",\"PRODUCT_BUNDLE\",\"COLLECTION_BUNDLE\",\"VOLUME_TIERED\",\"FREE_GIFT\",\"SPEND_X_SAVE_Y\",\"MIX_AND_MATCH\",\"QUANTITY_BREAKS\",\"MIN_QUANTITY\"]"
+          }
+        ]
+      },
+      {
+        "name": "Status",
+        "key": "status",
+        "type": "single_line_text_field",
+        "required": true,
+        "description": "ACTIVE | PAUSED | DRAFT | SCHEDULED | EXPIRED",
+        "validations": [
+          {
+            "name": "choices",
+            "value": "[\"ACTIVE\",\"PAUSED\",\"DRAFT\",\"SCHEDULED\",\"EXPIRED\"]"
+          }
+        ]
+      },
+      {
+        "name": "Pricing Display Mode",
+        "key": "pricing_display_mode",
+        "type": "single_line_text_field",
+        "required": false,
+        "description": "DISCOUNT_ON_PRICE | AUTO_COMPARE_AT | CALC_FROM_COMPARE_AT | MANUAL_OVERRIDE",
+        "validations": [
+          {
+            "name": "choices",
+            "value": "[\"DISCOUNT_ON_PRICE\",\"AUTO_COMPARE_AT\",\"CALC_FROM_COMPARE_AT\",\"MANUAL_OVERRIDE\"]"
+          }
+        ]
+      },
+      {
+        "name": "Discount Value",
+        "key": "discount_value",
+        "type": "number_decimal",
+        "required": false,
+        "description": "Percentage (e.g., 20 for 20%) or fixed amount (e.g., 10 for $10 off)"
+      },
+      {
+        "name": "Discount Type",
+        "key": "discount_type",
+        "type": "single_line_text_field",
+        "required": false,
+        "description": "percentage | fixed_amount | free",
+        "validations": [
+          {
+            "name": "choices",
+            "value": "[\"percentage\",\"fixed_amount\",\"free\"]"
+          }
+        ]
+      },
+      {
+        "name": "Buy Quantity",
+        "key": "buy_quantity",
+        "type": "number_integer",
+        "required": false,
+        "description": "For BOGO/BuyXGetY: number of items customer must buy"
+      },
+      {
+        "name": "Get Quantity",
+        "key": "get_quantity",
+        "type": "number_integer",
+        "required": false,
+        "description": "For BOGO/BuyXGetY: number of free/discounted items"
+      },
+      {
+        "name": "Get Discount Percent",
+        "key": "get_discount_percent",
+        "type": "number_decimal",
+        "required": false,
+        "description": "Discount % on 'get' items (100 = free, 50 = half price)"
+      },
+      {
+        "name": "Bundle Price",
+        "key": "bundle_price",
+        "type": "number_decimal",
+        "required": false,
+        "description": "Fixed price for the entire bundle"
+      },
+      {
+        "name": "Bundle Save Percent",
+        "key": "bundle_save_percent",
+        "type": "number_decimal",
+        "required": false,
+        "description": "Percentage saved vs individual prices"
+      },
+      {
+        "name": "Bundle Save Amount",
+        "key": "bundle_save_amount",
+        "type": "number_decimal",
+        "required": false,
+        "description": "Fixed amount saved vs individual prices"
+      },
+      {
+        "name": "Spend Threshold",
+        "key": "spend_threshold",
+        "type": "number_decimal",
+        "required": false,
+        "description": "For Spend X Save Y: minimum spend amount"
+      },
+      {
+        "name": "Mix Match Pick Count",
+        "key": "mix_match_pick_count",
+        "type": "number_integer",
+        "required": false,
+        "description": "For Mix & Match: how many items customer picks (e.g., 3)"
+      },
+      {
+        "name": "Volume Tiers JSON",
+        "key": "volume_tiers",
+        "type": "json",
+        "required": false,
+        "description": "JSON array of tiers: [{\"min_qty\": 3, \"discount\": 10}, {\"min_qty\": 5, \"discount\": 20}]"
+      },
+      {
+        "name": "Quantity Break Tiers JSON",
+        "key": "quantity_break_tiers",
+        "type": "json",
+        "required": false,
+        "description": "JSON array: [{\"min_qty\": 1, \"price_each\": 30}, {\"min_qty\": 3, \"price_each\": 25}]"
+      },
+      {
+        "name": "Min Quantity Required",
+        "key": "min_quantity",
+        "type": "number_integer",
+        "required": false,
+        "description": "For Min Quantity Discount: minimum items needed"
+      },
+      {
+        "name": "Manual Price Override",
+        "key": "manual_price",
+        "type": "number_decimal",
+        "required": false,
+        "description": "For MANUAL_OVERRIDE pricing mode: the display price"
+      },
+      {
+        "name": "Manual Compare At Price",
+        "key": "manual_compare_at_price",
+        "type": "number_decimal",
+        "required": false,
+        "description": "For MANUAL_OVERRIDE pricing mode: the compare-at price"
+      },
+      {
+        "name": "Target Products",
+        "key": "target_products",
+        "type": "list.product_reference",
+        "required": false,
+        "description": "Products this offer applies to"
+      },
+      {
+        "name": "Target Collections",
+        "key": "target_collections",
+        "type": "list.collection_reference",
+        "required": false,
+        "description": "Collections this offer applies to"
+      },
+      {
+        "name": "Gift Products",
+        "key": "gift_products",
+        "type": "list.product_reference",
+        "required": false,
+        "description": "For Free Gift / BOGO: the gift or 'get' products"
+      },
+      {
+        "name": "Popup Style",
+        "key": "popup_style",
+        "type": "single_line_text_field",
+        "required": false,
+        "description": "NONE | ENTRY | EXIT_INTENT | CART_UPSELL | FLOATING_BAR | SLIDE_IN | PRODUCT_BANNER | COUNTDOWN_MODAL",
+        "validations": [
+          {
+            "name": "choices",
+            "value": "[\"NONE\",\"ENTRY\",\"EXIT_INTENT\",\"CART_UPSELL\",\"FLOATING_BAR\",\"SLIDE_IN\",\"PRODUCT_BANNER\",\"COUNTDOWN_MODAL\"]"
+          }
+        ]
+      },
+      {
+        "name": "Popup Image",
+        "key": "popup_image",
+        "type": "file_reference",
+        "required": false,
+        "description": "Custom uploaded image for the popup/banner"
+      },
+      {
+        "name": "Badge Text",
+        "key": "badge_text",
+        "type": "single_line_text_field",
+        "required": false,
+        "description": "Text shown on offer badges (e.g., 'BOGO!', 'Save 25%')"
+      },
+      {
+        "name": "Popup Trigger Delay",
+        "key": "popup_delay_seconds",
+        "type": "number_integer",
+        "required": false,
+        "description": "Seconds before popup appears (0 = immediate)"
+      },
+      {
+        "name": "Popup Frequency",
+        "key": "popup_frequency",
+        "type": "single_line_text_field",
+        "required": false,
+        "description": "EVERY_VISIT | ONCE_PER_SESSION | ONCE_PER_DAY | ONCE_EVER",
+        "validations": [
+          {
+            "name": "choices",
+            "value": "[\"EVERY_VISIT\",\"ONCE_PER_SESSION\",\"ONCE_PER_DAY\",\"ONCE_EVER\"]"
+          }
+        ]
+      },
+      {
+        "name": "Show On Storefront",
+        "key": "show_on_storefront",
+        "type": "boolean",
+        "required": false,
+        "description": "Whether this offer is visible on the storefront"
+      },
+      {
+        "name": "Start Date",
+        "key": "starts_at",
+        "type": "date_time",
+        "required": false,
+        "description": "When the offer becomes active"
+      },
+      {
+        "name": "End Date",
+        "key": "ends_at",
+        "type": "date_time",
+        "required": false,
+        "description": "When the offer expires"
+      },
+      {
+        "name": "Priority",
+        "key": "priority",
+        "type": "number_integer",
+        "required": false,
+        "description": "Display priority (higher = shown first, 0 = default)"
+      },
+      {
+        "name": "Customer Target",
+        "key": "customer_target",
+        "type": "single_line_text_field",
+        "required": false,
+        "description": "ALL | NEW_ONLY | RETURNING_ONLY",
+        "validations": [
+          {
+            "name": "choices",
+            "value": "[\"ALL\",\"NEW_ONLY\",\"RETURNING_ONLY\"]"
+          }
+        ]
+      },
+      {
+        "name": "Gamification Type",
+        "key": "gamification_type",
+        "type": "single_line_text_field",
+        "required": false,
+        "description": "NONE | SPIN_WHEEL | SCRATCH_CARD | PROGRESS_BAR",
+        "validations": [
+          {
+            "name": "choices",
+            "value": "[\"NONE\",\"SPIN_WHEEL\",\"SCRATCH_CARD\",\"PROGRESS_BAR\"]"
+          }
+        ]
+      },
+      {
+        "name": "Gamification Prizes JSON",
+        "key": "gamification_prizes",
+        "type": "json",
+        "required": false,
+        "description": "JSON array of prizes: [{\"label\": \"10% Off\", \"code\": \"SPIN10\", \"probability\": 30}]"
+      },
+      {
+        "name": "Cart Progress Goal",
+        "key": "cart_progress_goal",
+        "type": "number_decimal",
+        "required": false,
+        "description": "Cart value target for progress bar (e.g., 100 for '$100 for free shipping')"
+      },
+      {
+        "name": "Cart Progress Message",
+        "key": "cart_progress_message",
+        "type": "single_line_text_field",
+        "required": false,
+        "description": "Message template: 'Spend {{remaining}} more for free shipping!'"
+      },
+      {
+        "name": "Social Proof Enabled",
+        "key": "social_proof_enabled",
+        "type": "boolean",
+        "required": false,
+        "description": "Show stock countdown, recent purchases, etc."
+      },
+      {
+        "name": "Stock Urgency Threshold",
+        "key": "stock_urgency_threshold",
+        "type": "number_integer",
+        "required": false,
+        "description": "Show 'Only X left!' when inventory drops below this number"
+      },
+      {
+        "name": "Translations JSON",
+        "key": "translations",
+        "type": "json",
+        "required": false,
+        "description": "Multi-language: {\"es\": {\"title\": \"...\", \"badge\": \"...\"}, \"fr\": {...}}"
+      }
+    ],
+    "access": {
+      "storefront": "PUBLIC_READ"
+    }
+  }
+}

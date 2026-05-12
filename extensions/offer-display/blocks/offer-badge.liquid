@@ -1,0 +1,87 @@
+{% comment %} Offer Badge — Displays a promotional badge on product/collection pages {% endcomment %}
+
+{% if block.settings.badge_text != blank %}
+  {% assign pos = block.settings.position | default: "top-right" %}
+
+  <div style="
+    position: absolute;
+    {% if pos == 'top-left' %}top: 8px; left: 8px;{% endif %}
+    {% if pos == 'top-right' %}top: 8px; right: 8px;{% endif %}
+    {% if pos == 'bottom-left' %}bottom: 8px; left: 8px;{% endif %}
+    {% if pos == 'bottom-right' %}bottom: 8px; right: 8px;{% endif %}
+    z-index: 10;
+  ">
+    <span style="
+      display: inline-block;
+      background: {{ block.settings.bg_color }};
+      color: {{ block.settings.text_color }};
+      padding: 4px 10px;
+      border-radius: {{ block.settings.style | default: 'rounded' | replace: 'rounded', '4px' | replace: 'pill', '20px' | replace: 'square', '0px' }};
+      font-size: {{ block.settings.font_size | default: 12 }}px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      line-height: 1.4;
+    ">{{ block.settings.badge_text }}</span>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Offer Badge",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "SALE"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Badge Position",
+      "options": [
+        { "value": "top-left", "label": "Top Left" },
+        { "value": "top-right", "label": "Top Right" },
+        { "value": "bottom-left", "label": "Bottom Left" },
+        { "value": "bottom-right", "label": "Bottom Right" }
+      ],
+      "default": "top-right"
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "Badge Style",
+      "options": [
+        { "value": "rounded", "label": "Rounded" },
+        { "value": "pill", "label": "Pill" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "rounded"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font Size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Background Color",
+      "default": "#e94560"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    }
+  ]
+}
+{% endschema %}

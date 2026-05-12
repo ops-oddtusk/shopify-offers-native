@@ -1,0 +1,60 @@
+name: Deploy Shopify App
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Javy CLI
+        run: |
+          JAVY_VERSION="v4.0.0"
+          ASSET="javy-x86_64-linux-${JAVY_VERSION}.gz"
+          URL="https://github.com/bytecodealliance/javy/releases/download/${JAVY_VERSION}/${ASSET}"
+          echo "Downloading Javy from: $URL"
+          curl -sSL "$URL" -o javy.gz
+          # Fallback: try latest release
+          if [ ! -s javy.gz ]; then
+            echo "Trying latest release..."
+            curl -sSL "https://github.com/bytecodealliance/javy/releases/latest/download/javy-x86_64-linux.gz" -o javy.gz
+          fi
+          gunzip javy.gz
+          chmod +x javy
+          sudo mv javy /usr/local/bin/javy
+          javy --version
+
+      - name: Install Shopify CLI
+        run: npm install -g @shopify/cli@latest
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Shopify Functions (JS to WASM)
+        run: |
+          for func_dir in extensions/product-discount; do
+            if [ -d "$func_dir/src" ]; then
+              echo "=== Building $func_dir ==="
+              mkdir -p "$func_dir/dist"
+              javy compile "$func_dir/src/run.js" -o "$func_dir/dist/function.wasm"
+              ls -lh "$func_dir/dist/function.wasm"
+              echo "=== Done ==="
+            fi
+          done
+
+      - name: Deploy to Shopify
+        env:
+          SHOPIFY_CLI_PARTNERS_TOKEN: ${{ secrets.SHOPIFY_CLI_PARTNERS_TOKEN }}
+        run: |
+          npx shopify app deploy --force \
+            --client-id e603a8fa8cd7c756d6f96d6b92dba29d

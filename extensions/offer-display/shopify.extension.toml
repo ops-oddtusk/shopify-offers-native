@@ -1,0 +1,39 @@
+api_version = "2024-10"
+uid = "ac3eb7c0-afc1-c8ca-06ca-6605b80fdfacd08e9d40"
+
+[[extensions]]
+type = "theme"
+name = "Offers & Bundles Display"
+handle = "offer-display"
+
+  # ── Product & Collection Blocks ────────────────────
+  [[extensions.blocks]]
+  type = "product-offer-banner"
+  name = "Product Page Offer Banner"
+  target = "section"
+
+  [[extensions.blocks]]
+  type = "bundle-card"
+  name = "Bundle Card"
+  target = "section"
+
+  [[extensions.blocks]]
+  type = "offer-badge"
+  name = "Offer Badge"
+  target = "section"
+
+  [[extensions.blocks]]
+  type = "volume-discount-table"
+  name = "Volume Discount Table"
+  target = "section"
+
+  [[extensions.blocks]]
+  type = "frequently-bought-together"
+  name = "Bought Together"
+  target = "section"
+
+  # ── Cart Blocks ────────────────────────────────────
+  [[extensions.blocks]]
+  type = "cart-progress-bar"
+  name = "Cart Progress Bar"
+  target = "section"
