@@ -25,30 +25,13 @@ jobs:
         working-directory: extensions/product-discount
         run: npm install
 
-      - name: Verify Javy binary downloaded
-        working-directory: extensions/product-discount
-        run: |
-          echo "Checking for javy binary..."
-          ls -la node_modules/.bin/ | grep javy || echo "No javy in .bin"
-          ls -la node_modules/javy/ || echo "No javy module"
-          npx javy --version || echo "javy --version failed"
-
-      - name: Build function separately
-        working-directory: extensions/product-discount
-        timeout-minutes: 5
-        run: |
-          echo "Starting function build at $(date)"
-          npm run build
-          echo "Build completed at $(date)"
-          ls -la dist/
-
       - name: Deploy to Shopify
-        timeout-minutes: 5
+        timeout-minutes: 10
         env:
           SHOPIFY_CLI_PARTNERS_TOKEN: ${{ secrets.SHOPIFY_CLI_PARTNERS_TOKEN }}
           CI: '1'
         run: |
-          echo "Starting deploy at $(date)"
+          echo "Deploy started at $(date)"
           npx shopify app deploy --allow-updates --allow-deletes \
             --client-id e603a8fa8cd7c756d6f96d6b92dba29d
-          echo "Deploy completed at $(date)"
+          echo "Deploy done at $(date)"
