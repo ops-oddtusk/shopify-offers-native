@@ -11,286 +11,206 @@
  *                 "VOLUME_TIERED" | "QUANTITY_BREAKS" | "FREE_GIFT" | "SPEND_X_SAVE_Y" |
  *                 "PRODUCT_BUNDLE" | "COLLECTION_BUNDLE" | "MIX_AND_MATCH" | "MIN_QUANTITY",
  *   "pricing_mode": "selling_price" | "compare_at_price",
- *   "discount_value": 15,          // percentage or fixed amount
- *   "min_quantity": 2,             // for MIN_QUANTITY, VOLUME_TIERED, etc.
- *   "tiers": [                     // for VOLUME_TIERED / QUANTITY_BREAKS
- *     { "min_qty": 2, "discount": 10 },
- *     { "min_qty": 5, "discount": 20 }
- *   ],
- *   "buy_qty": 2,                  // for BOGO, BUY_X_GET_Y
- *   "get_qty": 1,                  // for BOGO, BUY_X_GET_Y
- *   "spend_threshold": 100,        // for SPEND_X_SAVE_Y
- *   "message": "15% off!"          // shown at checkout
+ *   "discount_value": 15,
+ *   "min_quantity": 2,
+ *   "tiers": [{ "min_qty": 2, "discount": 10 }, { "min_qty": 5, "discount": 20 }],
+ *   "buy_qty": 2,
+ *   "get_qty": 1,
+ *   "spend_threshold": 100,
+ *   "message": "15% off!"
  * }
  */
 
-export function run(input) {
-  const EMPTY = { discountApplicationStrategy: "FIRST", discounts: [] };
+var EMPTY = { discountApplicationStrategy: "FIRST", discounts: [] };
 
-  // Parse config from metafield
-  const configRaw = input?.discountNode?.metafield?.value;
+function run(input) {
+  var configRaw = input && input.discountNode && input.discountNode.metafield
+    ? input.discountNode.metafield.value : null;
   if (!configRaw) return EMPTY;
 
-  let config;
-  try {
-    config = JSON.parse(configRaw);
-  } catch (e) {
-    return EMPTY;
-  }
+  var config;
+  try { config = JSON.parse(configRaw); } catch (e) { return EMPTY; }
 
-  const offerType = config.offer_type || "PERCENTAGE_OFF";
-  const pricingMode = config.pricing_mode || "selling_price";
-  const lines = input?.cart?.lines || [];
-
+  var offerType = config.offer_type || "PERCENTAGE_OFF";
+  var pricingMode = config.pricing_mode || "selling_price";
+  var lines = (input && input.cart && input.cart.lines) ? input.cart.lines : [];
   if (lines.length === 0) return EMPTY;
 
-  const discounts = [];
+  var discounts = [];
 
-  switch (offerType) {
-    case "PERCENTAGE_OFF":
-      discounts.push(...applyPercentageOff(lines, config, pricingMode));
-      break;
-    case "FIXED_AMOUNT":
-      discounts.push(...applyFixedAmount(lines, config, pricingMode));
-      break;
-    case "BOGO":
-      discounts.push(...applyBogo(lines, config, pricingMode));
-      break;
-    case "BUY_X_GET_Y":
-      discounts.push(...applyBuyXGetY(lines, config, pricingMode));
-      break;
-    case "VOLUME_TIERED":
-      discounts.push(...applyVolumeTiered(lines, config, pricingMode));
-      break;
-    case "QUANTITY_BREAKS":
-      discounts.push(...applyQuantityBreaks(lines, config, pricingMode));
-      break;
-    case "FREE_GIFT":
-      discounts.push(...applyFreeGift(lines, config));
-      break;
-    case "SPEND_X_SAVE_Y":
-      discounts.push(...applySpendXSaveY(lines, config, pricingMode));
-      break;
-    case "PRODUCT_BUNDLE":
-    case "COLLECTION_BUNDLE":
-    case "MIX_AND_MATCH":
-      discounts.push(...applyBundle(lines, config, pricingMode));
-      break;
-    case "MIN_QUANTITY":
-      discounts.push(...applyMinQuantity(lines, config, pricingMode));
-      break;
-  }
+  if (offerType === "PERCENTAGE_OFF") discounts = applyPercentageOff(lines, config, pricingMode);
+  else if (offerType === "FIXED_AMOUNT") discounts = applyFixedAmount(lines, config, pricingMode);
+  else if (offerType === "BOGO") discounts = applyBogo(lines, config, pricingMode);
+  else if (offerType === "BUY_X_GET_Y") discounts = applyBuyXGetY(lines, config, pricingMode);
+  else if (offerType === "VOLUME_TIERED") discounts = applyVolumeTiered(lines, config, pricingMode);
+  else if (offerType === "QUANTITY_BREAKS") discounts = applyQuantityBreaks(lines, config, pricingMode);
+  else if (offerType === "FREE_GIFT") discounts = applyFreeGift(lines, config);
+  else if (offerType === "SPEND_X_SAVE_Y") discounts = applySpendXSaveY(lines, config, pricingMode);
+  else if (offerType === "PRODUCT_BUNDLE" || offerType === "COLLECTION_BUNDLE" || offerType === "MIX_AND_MATCH") discounts = applyBundle(lines, config, pricingMode);
+  else if (offerType === "MIN_QUANTITY") discounts = applyMinQuantity(lines, config, pricingMode);
 
   if (discounts.length === 0) return EMPTY;
-
-  return {
-    discountApplicationStrategy: "FIRST",
-    discounts,
-  };
+  return { discountApplicationStrategy: "FIRST", discounts: discounts };
 }
 
 // ── Helpers ──────────────────────────────────────────────
 
-function getBasePrice(variant, pricingMode) {
-  if (pricingMode === "compare_at_price" && variant.compareAtPrice) {
-    return parseFloat(variant.compareAtPrice.amount);
-  }
-  return parseFloat(variant.price.amount);
+function getSellingPrice(line) {
+  return parseFloat(line.cost.amountPerQuantity.amount);
 }
 
-function getCurrency(variant) {
-  return variant.price.currencyCode;
+function getBasePrice(line, pricingMode) {
+  if (pricingMode === "compare_at_price" && line.cost.compareAtAmountPerQuantity) {
+    return parseFloat(line.cost.compareAtAmountPerQuantity.amount);
+  }
+  return getSellingPrice(line);
+}
+
+function getCurrency(line) {
+  return line.cost.amountPerQuantity.currencyCode;
 }
 
 function makePercentageDiscount(targets, percentage, message) {
   return {
-    targets,
+    targets: targets,
     value: { percentage: { value: String(Math.min(percentage, 100)) } },
-    message: message || `${percentage}% off`,
+    message: message || percentage + "% off"
   };
 }
 
 function makeFixedDiscount(targets, amount, currency, message) {
   return {
-    targets,
-    value: { fixedAmount: { amount: String(amount), currencyCode: currency } },
-    message: message || `$${amount} off`,
+    targets: targets,
+    value: { fixedAmount: { amount: String(amount) } },
+    message: message || "$" + amount + " off"
   };
 }
 
 function getEligibleLines(lines) {
-  return lines.filter((line) => {
-    const variant = line.merchandise;
-    return variant && variant.__typename !== undefined;
-  });
+  var result = [];
+  for (var i = 0; i < lines.length; i++) {
+    if (lines[i].merchandise && lines[i].cost) result.push(lines[i]);
+  }
+  return result;
 }
 
 function lineTargets(lines) {
-  return lines.map((line) => ({
-    productVariant: { id: line.merchandise.id },
-  }));
+  var targets = [];
+  for (var i = 0; i < lines.length; i++) {
+    targets.push({ productVariant: { id: lines[i].merchandise.id } });
+  }
+  return targets;
 }
 
 // ── Offer Type Implementations ───────────────────────────
 
 function applyPercentageOff(lines, config, pricingMode) {
-  const eligible = getEligibleLines(lines);
+  var eligible = getEligibleLines(lines);
   if (eligible.length === 0) return [];
-
-  const pct = parseFloat(config.discount_value) || 10;
+  var pct = parseFloat(config.discount_value) || 10;
 
   if (pricingMode === "compare_at_price") {
-    // Calculate per-line fixed amounts based on compare-at price
-    const results = [];
-    for (const line of eligible) {
-      const variant = line.merchandise;
-      const base = getBasePrice(variant, pricingMode);
-      const selling = parseFloat(variant.price.amount);
-      const discountAmt = base * (pct / 100);
-      // Only discount if the calculated discount > (compare_at - selling)
-      const effectiveDiscount = Math.max(0, discountAmt - (base - selling));
-      if (effectiveDiscount > 0) {
-        results.push(
-          makeFixedDiscount(
-            [{ productVariant: { id: variant.id } }],
-            effectiveDiscount.toFixed(2),
-            getCurrency(variant),
-            config.message || `${pct}% off (compare-at)`
-          )
-        );
+    var results = [];
+    for (var i = 0; i < eligible.length; i++) {
+      var base = getBasePrice(eligible[i], pricingMode);
+      var selling = getSellingPrice(eligible[i]);
+      var discountAmt = base * (pct / 100);
+      var effective = Math.max(0, discountAmt - (base - selling));
+      if (effective > 0) {
+        results.push(makeFixedDiscount(
+          [{ productVariant: { id: eligible[i].merchandise.id } }],
+          effective.toFixed(2), getCurrency(eligible[i]),
+          config.message || pct + "% off (compare-at)"
+        ));
       }
     }
     return results;
   }
-
   return [makePercentageDiscount(lineTargets(eligible), pct, config.message)];
 }
 
 function applyFixedAmount(lines, config, pricingMode) {
-  const eligible = getEligibleLines(lines);
+  var eligible = getEligibleLines(lines);
   if (eligible.length === 0) return [];
-
-  const amount = parseFloat(config.discount_value) || 5;
-  const currency = getCurrency(eligible[0].merchandise);
+  var amount = parseFloat(config.discount_value) || 5;
 
   if (pricingMode === "compare_at_price") {
-    const results = [];
-    for (const line of eligible) {
-      const variant = line.merchandise;
-      const base = getBasePrice(variant, pricingMode);
-      const selling = parseFloat(variant.price.amount);
-      const alreadyDiscounted = base - selling;
-      const effectiveDiscount = Math.max(0, amount - alreadyDiscounted);
-      if (effectiveDiscount > 0) {
-        results.push(
-          makeFixedDiscount(
-            [{ productVariant: { id: variant.id } }],
-            effectiveDiscount.toFixed(2),
-            getCurrency(variant),
-            config.message || `$${amount} off (compare-at)`
-          )
-        );
+    var results = [];
+    for (var i = 0; i < eligible.length; i++) {
+      var base = getBasePrice(eligible[i], pricingMode);
+      var selling = getSellingPrice(eligible[i]);
+      var already = base - selling;
+      var effective = Math.max(0, amount - already);
+      if (effective > 0) {
+        results.push(makeFixedDiscount(
+          [{ productVariant: { id: eligible[i].merchandise.id } }],
+          effective.toFixed(2), getCurrency(eligible[i]),
+          config.message || "$" + amount + " off (compare-at)"
+        ));
       }
     }
     return results;
   }
-
-  return [
-    makeFixedDiscount(lineTargets(eligible), amount, currency, config.message),
-  ];
+  return [makeFixedDiscount(lineTargets(eligible), amount, getCurrency(eligible[0]), config.message)];
 }
 
 function applyBogo(lines, config, pricingMode) {
-  return applyBuyXGetY(
-    lines,
-    { ...config, buy_qty: 1, get_qty: 1, discount_value: 100 },
-    pricingMode
-  );
+  return applyBuyXGetY(lines, { offer_type: config.offer_type, pricing_mode: config.pricing_mode, discount_value: 100, buy_qty: 1, get_qty: 1, message: config.message }, pricingMode);
 }
 
 function applyBuyXGetY(lines, config, pricingMode) {
-  const eligible = getEligibleLines(lines);
+  var eligible = getEligibleLines(lines);
   if (eligible.length === 0) return [];
+  var buyQty = parseInt(config.buy_qty) || 2;
+  var getQty = parseInt(config.get_qty) || 1;
+  var pct = parseFloat(config.discount_value) || 100;
+  var results = [];
 
-  const buyQty = parseInt(config.buy_qty) || 2;
-  const getQty = parseInt(config.get_qty) || 1;
-  const pct = parseFloat(config.discount_value) || 100;
-
-  const results = [];
-  for (const line of eligible) {
-    const totalQty = line.quantity;
-    const sets = Math.floor(totalQty / (buyQty + getQty));
+  for (var i = 0; i < eligible.length; i++) {
+    var sets = Math.floor(eligible[i].quantity / (buyQty + getQty));
     if (sets > 0) {
-      const freeItems = sets * getQty;
-      const variant = line.merchandise;
-      const base = getBasePrice(variant, pricingMode);
-      const discountPerItem = base * (pct / 100);
-      const totalDiscount = discountPerItem * freeItems;
-
-      if (pricingMode === "compare_at_price") {
-        const selling = parseFloat(variant.price.amount);
-        const effectivePerItem = Math.min(discountPerItem, selling);
-        results.push(
-          makeFixedDiscount(
-            [{ productVariant: { id: variant.id } }],
-            (effectivePerItem * freeItems).toFixed(2),
-            getCurrency(variant),
-            config.message || `Buy ${buyQty} Get ${getQty} ${pct}% off`
-          )
-        );
-      } else {
-        results.push(
-          makeFixedDiscount(
-            [{ productVariant: { id: variant.id } }],
-            totalDiscount.toFixed(2),
-            getCurrency(variant),
-            config.message || `Buy ${buyQty} Get ${getQty} ${pct}% off`
-          )
-        );
-      }
+      var freeItems = sets * getQty;
+      var base = getBasePrice(eligible[i], pricingMode);
+      var selling = getSellingPrice(eligible[i]);
+      var discountPerItem = base * (pct / 100);
+      var effectivePerItem = pricingMode === "compare_at_price" ? Math.min(discountPerItem, selling) : discountPerItem;
+      results.push(makeFixedDiscount(
+        [{ productVariant: { id: eligible[i].merchandise.id } }],
+        (effectivePerItem * freeItems).toFixed(2), getCurrency(eligible[i]),
+        config.message || "Buy " + buyQty + " Get " + getQty + " " + pct + "% off"
+      ));
     }
   }
   return results;
 }
 
 function applyVolumeTiered(lines, config, pricingMode) {
-  const eligible = getEligibleLines(lines);
+  var eligible = getEligibleLines(lines);
   if (eligible.length === 0) return [];
-
-  const tiers = (config.tiers || []).sort(
-    (a, b) => b.min_qty - a.min_qty
-  );
+  var tiers = (config.tiers || []).slice().sort(function(a, b) { return b.min_qty - a.min_qty; });
   if (tiers.length === 0) return [];
+  var results = [];
 
-  const results = [];
-  for (const line of eligible) {
-    const qty = line.quantity;
-    const tier = tiers.find((t) => qty >= t.min_qty);
+  for (var i = 0; i < eligible.length; i++) {
+    var qty = eligible[i].quantity;
+    var tier = null;
+    for (var t = 0; t < tiers.length; t++) { if (qty >= tiers[t].min_qty) { tier = tiers[t]; break; } }
     if (tier) {
-      const variant = line.merchandise;
-      const base = getBasePrice(variant, pricingMode);
-      const pct = parseFloat(tier.discount);
-      const discountAmt = base * (pct / 100);
-
+      var pct = parseFloat(tier.discount);
       if (pricingMode === "compare_at_price") {
-        const selling = parseFloat(variant.price.amount);
-        const effective = Math.min(discountAmt, selling);
-        results.push(
-          makeFixedDiscount(
-            [{ productVariant: { id: variant.id } }],
-            (effective * qty).toFixed(2),
-            getCurrency(variant),
-            config.message || `${pct}% off (${qty}+ items)`
-          )
-        );
+        var base = getBasePrice(eligible[i], pricingMode);
+        var selling = getSellingPrice(eligible[i]);
+        var effective = Math.min(base * (pct / 100), selling);
+        results.push(makeFixedDiscount(
+          [{ productVariant: { id: eligible[i].merchandise.id } }],
+          (effective * qty).toFixed(2), getCurrency(eligible[i]),
+          config.message || pct + "% off (" + qty + "+ items)"
+        ));
       } else {
-        results.push(
-          makePercentageDiscount(
-            [{ productVariant: { id: variant.id } }],
-            pct,
-            config.message || `${pct}% off (${qty}+ items)`
-          )
-        );
+        results.push(makePercentageDiscount(
+          [{ productVariant: { id: eligible[i].merchandise.id } }],
+          pct, config.message || pct + "% off (" + qty + "+ items)"
+        ));
       }
     }
   }
@@ -298,40 +218,28 @@ function applyVolumeTiered(lines, config, pricingMode) {
 }
 
 function applyQuantityBreaks(lines, config, pricingMode) {
-  // Same as volume tiered but with fixed price per item instead of percentage
-  const eligible = getEligibleLines(lines);
+  var eligible = getEligibleLines(lines);
   if (eligible.length === 0) return [];
-
-  const tiers = (config.tiers || []).sort(
-    (a, b) => b.min_qty - a.min_qty
-  );
+  var tiers = (config.tiers || []).slice().sort(function(a, b) { return b.min_qty - a.min_qty; });
   if (tiers.length === 0) return [];
+  var results = [];
 
-  const results = [];
-  for (const line of eligible) {
-    const qty = line.quantity;
-    const tier = tiers.find((t) => qty >= t.min_qty);
+  for (var i = 0; i < eligible.length; i++) {
+    var qty = eligible[i].quantity;
+    var tier = null;
+    for (var t = 0; t < tiers.length; t++) { if (qty >= tiers[t].min_qty) { tier = tiers[t]; break; } }
     if (tier && tier.price_each) {
-      const variant = line.merchandise;
-      const base = getBasePrice(variant, pricingMode);
-      const priceEach = parseFloat(tier.price_each);
-      const discountPerItem = Math.max(0, base - priceEach);
-
-      if (discountPerItem > 0) {
-        const selling = parseFloat(variant.price.amount);
-        const effective =
-          pricingMode === "compare_at_price"
-            ? Math.min(discountPerItem, selling)
-            : discountPerItem;
-
-        results.push(
-          makeFixedDiscount(
-            [{ productVariant: { id: variant.id } }],
-            (effective * qty).toFixed(2),
-            getCurrency(variant),
-            config.message || `$${priceEach} each (${qty}+)`
-          )
-        );
+      var base = getBasePrice(eligible[i], pricingMode);
+      var selling = getSellingPrice(eligible[i]);
+      var priceEach = parseFloat(tier.price_each);
+      var discountPerItem = Math.max(0, base - priceEach);
+      var effective = pricingMode === "compare_at_price" ? Math.min(discountPerItem, selling) : discountPerItem;
+      if (effective > 0) {
+        results.push(makeFixedDiscount(
+          [{ productVariant: { id: eligible[i].merchandise.id } }],
+          (effective * qty).toFixed(2), getCurrency(eligible[i]),
+          config.message || "$" + priceEach + " each (" + qty + "+)"
+        ));
       }
     }
   }
@@ -339,158 +247,107 @@ function applyQuantityBreaks(lines, config, pricingMode) {
 }
 
 function applyFreeGift(lines, config) {
-  // Free gift: 100% off items tagged with offer-discount when threshold is met
-  const eligible = getEligibleLines(lines);
-  const giftLines = eligible.filter(
-    (l) => l.merchandise.product && l.merchandise.product.hasAnyTag
-  );
-
+  var eligible = getEligibleLines(lines);
+  var giftLines = [];
+  for (var i = 0; i < eligible.length; i++) {
+    if (eligible[i].merchandise.product && eligible[i].merchandise.product.hasAnyTag) giftLines.push(eligible[i]);
+  }
   if (giftLines.length === 0) return [];
 
-  const threshold = parseFloat(config.spend_threshold) || 0;
-  const nonGiftTotal = eligible
-    .filter((l) => !l.merchandise.product?.hasAnyTag)
-    .reduce(
-      (sum, l) => sum + parseFloat(l.merchandise.price.amount) * l.quantity,
-      0
-    );
-
+  var threshold = parseFloat(config.spend_threshold) || 0;
+  var nonGiftTotal = 0;
+  for (var i = 0; i < eligible.length; i++) {
+    if (!(eligible[i].merchandise.product && eligible[i].merchandise.product.hasAnyTag)) {
+      nonGiftTotal += getSellingPrice(eligible[i]) * eligible[i].quantity;
+    }
+  }
   if (threshold > 0 && nonGiftTotal < threshold) return [];
-
-  return [
-    makePercentageDiscount(
-      lineTargets(giftLines),
-      100,
-      config.message || "Free gift!"
-    ),
-  ];
+  return [makePercentageDiscount(lineTargets(giftLines), 100, config.message || "Free gift!")];
 }
 
 function applySpendXSaveY(lines, config, pricingMode) {
-  const eligible = getEligibleLines(lines);
+  var eligible = getEligibleLines(lines);
   if (eligible.length === 0) return [];
-
-  const threshold = parseFloat(config.spend_threshold) || 100;
-  const cartTotal = eligible.reduce((sum, l) => {
-    const base = getBasePrice(l.merchandise, pricingMode);
-    return sum + base * l.quantity;
-  }, 0);
-
+  var threshold = parseFloat(config.spend_threshold) || 100;
+  var cartTotal = 0;
+  for (var i = 0; i < eligible.length; i++) {
+    cartTotal += getBasePrice(eligible[i], pricingMode) * eligible[i].quantity;
+  }
   if (cartTotal < threshold) return [];
-
-  const pct = parseFloat(config.discount_value) || 10;
-  const currency = getCurrency(eligible[0].merchandise);
+  var pct = parseFloat(config.discount_value) || 10;
 
   if (pricingMode === "compare_at_price") {
-    const results = [];
-    for (const line of eligible) {
-      const variant = line.merchandise;
-      const base = getBasePrice(variant, pricingMode);
-      const selling = parseFloat(variant.price.amount);
-      const discountAmt = base * (pct / 100);
-      const effective = Math.min(discountAmt, selling);
+    var results = [];
+    for (var i = 0; i < eligible.length; i++) {
+      var base = getBasePrice(eligible[i], pricingMode);
+      var selling = getSellingPrice(eligible[i]);
+      var effective = Math.min(base * (pct / 100), selling);
       if (effective > 0) {
-        results.push(
-          makeFixedDiscount(
-            [{ productVariant: { id: variant.id } }],
-            (effective * line.quantity).toFixed(2),
-            getCurrency(variant),
-            config.message ||
-              `Spend $${threshold}+, save ${pct}% (compare-at)`
-          )
-        );
+        results.push(makeFixedDiscount(
+          [{ productVariant: { id: eligible[i].merchandise.id } }],
+          (effective * eligible[i].quantity).toFixed(2), getCurrency(eligible[i]),
+          config.message || "Spend $" + threshold + "+, save " + pct + "%"
+        ));
       }
     }
     return results;
   }
-
-  return [
-    makePercentageDiscount(
-      lineTargets(eligible),
-      pct,
-      config.message || `Spend $${threshold}+, save ${pct}%`
-    ),
-  ];
+  return [makePercentageDiscount(lineTargets(eligible), pct, config.message || "Spend $" + threshold + "+, save " + pct + "%")];
 }
 
 function applyBundle(lines, config, pricingMode) {
-  // Bundle discount: all items in cart get percentage off
-  const eligible = getEligibleLines(lines);
-  const minItems = parseInt(config.min_quantity) || 2;
-  const totalQty = eligible.reduce((sum, l) => sum + l.quantity, 0);
-
+  var eligible = getEligibleLines(lines);
+  var minItems = parseInt(config.min_quantity) || 2;
+  var totalQty = 0;
+  for (var i = 0; i < eligible.length; i++) totalQty += eligible[i].quantity;
   if (totalQty < minItems) return [];
-
-  const pct = parseFloat(config.discount_value) || 10;
+  var pct = parseFloat(config.discount_value) || 10;
 
   if (pricingMode === "compare_at_price") {
-    const results = [];
-    for (const line of eligible) {
-      const variant = line.merchandise;
-      const base = getBasePrice(variant, pricingMode);
-      const selling = parseFloat(variant.price.amount);
-      const discountAmt = base * (pct / 100);
-      const effective = Math.min(discountAmt, selling);
+    var results = [];
+    for (var i = 0; i < eligible.length; i++) {
+      var base = getBasePrice(eligible[i], pricingMode);
+      var selling = getSellingPrice(eligible[i]);
+      var effective = Math.min(base * (pct / 100), selling);
       if (effective > 0) {
-        results.push(
-          makeFixedDiscount(
-            [{ productVariant: { id: variant.id } }],
-            (effective * line.quantity).toFixed(2),
-            getCurrency(variant),
-            config.message || `Bundle ${pct}% off`
-          )
-        );
+        results.push(makeFixedDiscount(
+          [{ productVariant: { id: eligible[i].merchandise.id } }],
+          (effective * eligible[i].quantity).toFixed(2), getCurrency(eligible[i]),
+          config.message || "Bundle " + pct + "% off"
+        ));
       }
     }
     return results;
   }
-
-  return [
-    makePercentageDiscount(
-      lineTargets(eligible),
-      pct,
-      config.message || `Bundle ${pct}% off`
-    ),
-  ];
+  return [makePercentageDiscount(lineTargets(eligible), pct, config.message || "Bundle " + pct + "% off")];
 }
 
 function applyMinQuantity(lines, config, pricingMode) {
-  const eligible = getEligibleLines(lines);
+  var eligible = getEligibleLines(lines);
   if (eligible.length === 0) return [];
-
-  const minQty = parseInt(config.min_quantity) || 2;
-  const pct = parseFloat(config.discount_value) || 10;
-
-  const qualifying = eligible.filter((l) => l.quantity >= minQty);
+  var minQty = parseInt(config.min_quantity) || 2;
+  var pct = parseFloat(config.discount_value) || 10;
+  var qualifying = [];
+  for (var i = 0; i < eligible.length; i++) {
+    if (eligible[i].quantity >= minQty) qualifying.push(eligible[i]);
+  }
   if (qualifying.length === 0) return [];
 
   if (pricingMode === "compare_at_price") {
-    const results = [];
-    for (const line of qualifying) {
-      const variant = line.merchandise;
-      const base = getBasePrice(variant, pricingMode);
-      const selling = parseFloat(variant.price.amount);
-      const discountAmt = base * (pct / 100);
-      const effective = Math.min(discountAmt, selling);
+    var results = [];
+    for (var i = 0; i < qualifying.length; i++) {
+      var base = getBasePrice(qualifying[i], pricingMode);
+      var selling = getSellingPrice(qualifying[i]);
+      var effective = Math.min(base * (pct / 100), selling);
       if (effective > 0) {
-        results.push(
-          makeFixedDiscount(
-            [{ productVariant: { id: variant.id } }],
-            (effective * line.quantity).toFixed(2),
-            getCurrency(variant),
-            config.message || `${pct}% off (min ${minQty})`
-          )
-        );
+        results.push(makeFixedDiscount(
+          [{ productVariant: { id: qualifying[i].merchandise.id } }],
+          (effective * qualifying[i].quantity).toFixed(2), getCurrency(qualifying[i]),
+          config.message || pct + "% off (min " + minQty + ")"
+        ));
       }
     }
     return results;
   }
-
-  return [
-    makePercentageDiscount(
-      lineTargets(qualifying),
-      pct,
-      config.message || `${pct}% off (min ${minQty})`
-    ),
-  ];
+  return [makePercentageDiscount(lineTargets(qualifying), pct, config.message || pct + "% off (min " + minQty + ")")];
 }

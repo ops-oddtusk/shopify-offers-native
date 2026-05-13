@@ -3,6 +3,16 @@ query RunInput {
     lines {
       id
       quantity
+      cost {
+        amountPerQuantity {
+          amount
+          currencyCode
+        }
+        compareAtAmountPerQuantity {
+          amount
+          currencyCode
+        }
+      }
       merchandise {
         ... on ProductVariant {
           id
@@ -10,14 +20,6 @@ query RunInput {
             id
             handle
             hasAnyTag(tags: ["offer-discount"])
-          }
-          price {
-            amount
-            currencyCode
-          }
-          compareAtPrice {
-            amount
-            currencyCode
           }
         }
       }
