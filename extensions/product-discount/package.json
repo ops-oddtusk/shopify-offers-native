@@ -3,11 +3,6 @@
   "version": "0.0.1",
   "license": "UNLICENSED",
   "scripts": {
-    "build": "npm exec -- shopify app function build",
-    "typegen": "npm exec -- shopify app function typegen",
-    "preview": "npm exec -- shopify app function run"
-  },
-  "dependencies": {
-    "@shopify/shopify_function": "^2.0.0"
+    "build": "node build.js"
   }
 }
