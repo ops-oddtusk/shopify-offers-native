@@ -1,10 +1,7 @@
-import "@shopify/ui-extensions/preact";
-import { render } from "preact";
-import { useState } from "preact/hooks";
+import { useState } from "react";
+import { reactExtension, TextField, Select, BlockStack, Text, Section } from "@shopify/ui-extensions-react/admin";
 
-export default async function main(root) {
-  render(<App />, document.body);
-}
+export default reactExtension("admin.discount-details.function-settings.render", () => <App />);
 
 function App() {
   const [pricingMode, setPricingMode] = useState("compare_at_price");
@@ -13,49 +10,43 @@ function App() {
   const [message, setMessage] = useState("Special offer!");
 
   return (
-    <s-section heading="Compare At Price Discount Settings">
-      <s-stack gap="base">
-        <s-select
+    <Section heading="Compare At Price Discount Settings">
+      <BlockStack gap="base">
+        <Select
           label="Pricing Mode"
           name="pricing_mode"
           value={pricingMode}
-          onChange={(e) => setPricingMode(e.currentTarget.value)}
-        >
-          <s-option value="compare_at_price">Compare-at Price</s-option>
-          <s-option value="selling_price">Selling Price</s-option>
-        </s-select>
-
-        <s-select
+          onChange={setPricingMode}
+          options={[
+            { label: "Compare-at Price", value: "compare_at_price" },
+            { label: "Selling Price", value: "selling_price" }
+          ]}
+        />
+        <Select
           label="Discount Type"
           name="discount_type"
           value={discountType}
-          onChange={(e) => setDiscountType(e.currentTarget.value)}
-        >
-          <s-option value="percentage">Percentage</s-option>
-          <s-option value="fixed">Fixed Amount</s-option>
-        </s-select>
-
-        <s-number-field
+          onChange={setDiscountType}
+          options={[
+            { label: "Percentage", value: "percentage" },
+            { label: "Fixed Amount", value: "fixed" }
+          ]}
+        />
+        <TextField
           label="Discount Value"
           name="discount_value"
           value={discountValue}
-          min={0}
-          max={100}
-          onChange={(e) => setDiscountValue(e.currentTarget.value)}
+          onChange={setDiscountValue}
+          type="number"
         />
-
-        <s-text-field
+        <TextField
           label="Discount Message"
           name="message"
           value={message}
-          onChange={(e) => setMessage(e.currentTarget.value)}
+          onChange={setMessage}
         />
-
-        <s-text variant="bodyMd">
-          This discount uses the compare-at price to calculate savings.
-          Products with a compare-at price will receive the configured discount.
-        </s-text>
-      </s-stack>
-    </s-section>
+        <Text>Products with a compare-at price will receive the configured discount.</Text>
+      </BlockStack>
+    </Section>
   );
 }
