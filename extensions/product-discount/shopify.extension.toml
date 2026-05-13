@@ -12,7 +12,6 @@ description = "Applies discounts based on compare-at price"
   export = "run"
 
   [extensions.build]
-  command = "node build.js"
   path = "dist/function.wasm"
 
   [extensions.ui]
