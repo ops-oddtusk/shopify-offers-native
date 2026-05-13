@@ -1,8 +1,13 @@
 name = "Offers & Bundles Manager"
 client_id = "e603a8fa8cd7c756d6f96d6b92dba29d"
+application_url = "https://shopify.com"
+embedded = true
 
 [access_scopes]
 scopes = "write_products,read_products,write_discounts,read_discounts"
+
+[auth]
+redirect_urls = []
 
 [webhooks]
 api_version = "2025-07"
