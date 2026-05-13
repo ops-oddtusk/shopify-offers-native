@@ -3,7 +3,7 @@ name: Deploy Shopify App
 on:
   push:
     branches: [main]
-  workflow_dispatch:  # manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -20,8 +20,11 @@ jobs:
       - name: Install Shopify CLI
         run: npm install -g @shopify/cli@latest
 
-      - name: Install dependencies
+      - name: Install root dependencies
         run: npm install
+
+      - name: Install function dependencies
+        run: cd extensions/product-discount && npm install
 
       - name: Deploy to Shopify
         env:

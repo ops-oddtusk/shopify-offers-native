@@ -1,7 +1,14 @@
 {
   "name": "offer-product-discount",
-  "private": true,
+  "version": "0.0.1",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "npm exec -- shopify app function build",
+    "typegen": "npm exec -- shopify app function typegen",
+    "preview": "npm exec -- shopify app function run"
+  },
   "dependencies": {
-    "@shopify/shopify_function": "^2.0.0"
+    "@shopify/shopify_function": "0.1.0",
+    "javy": "0.1.1"
   }
 }

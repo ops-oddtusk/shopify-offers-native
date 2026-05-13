@@ -1,16 +1,19 @@
 api_version = "2025-07"
-name = "Offer Product Discount"
-type = "function"
+
+[[extensions]]
+name = "Compare At Discount"
 handle = "offer-product-discount"
+type = "function"
+description = "Applies discounts based on compare-at price"
 
-[build]
-path = "dist/index.wasm"
-watch = ["src/**/*.js"]
+  [[extensions.targeting]]
+  target = "purchase.product-discount.run"
+  input_query = "src/run.graphql"
+  export = "run"
 
-[[targeting]]
-target = "purchase.product-discount.run"
-input_query = "input-queries/run.graphql"
-export = "run"
+  [extensions.build]
+  command = "npm run build"
+  path = "dist/function.wasm"
 
-[ui]
-enable_create = true
+  [extensions.ui]
+  enable_create = true
