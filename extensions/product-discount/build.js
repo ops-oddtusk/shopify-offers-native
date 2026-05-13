@@ -9,13 +9,9 @@ execSync(
   { stdio: "inherit" }
 );
 
-console.log("Compiling with Javy...");
-try {
-  execSync("javy build dist/index.js -o dist/function.wasm", { stdio: "inherit" });
-} catch (e) {
-  console.log("Trying compile command instead...");
-  execSync("javy compile dist/index.js -o dist/function.wasm", { stdio: "inherit" });
-}
+console.log("Compiling with Javy (dynamic linking)...");
+execSync("javy emit-plugin -o dist/plugin.wasm", { stdio: "inherit" });
+execSync("javy build -C dynamic -C plugin=dist/plugin.wasm -o dist/function.wasm dist/index.js", { stdio: "inherit" });
 
 const size = fs.statSync("dist/function.wasm").size;
 console.log("Done! WASM size: " + size + " bytes");
