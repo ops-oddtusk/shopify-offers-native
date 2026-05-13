@@ -30,7 +30,6 @@ jobs:
         env:
           SHOPIFY_CLI_PARTNERS_TOKEN: ${{ secrets.SHOPIFY_CLI_PARTNERS_TOKEN }}
           CI: '1'
-          SHOPIFY_FLAG_NO_RELEASE: '0'
         run: |
           npx shopify app deploy --allow-updates --allow-deletes \
             --client-id e603a8fa8cd7c756d6f96d6b92dba29d
