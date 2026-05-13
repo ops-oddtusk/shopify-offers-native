@@ -1,0 +1,15 @@
+api_version = "2025-07"
+
+[[extensions]]
+type = "ui_extension"
+name = "Compare At Discount Settings"
+handle = "discount-settings"
+description = "Configure compare-at price discount settings"
+
+  [[extensions.targeting]]
+  module = "./src/DiscountFunctionSettings.jsx"
+  target = "admin.discount-details.function-settings.render"
+
+  [[extensions.metafields]]
+  namespace = "$app"
+  key = "function-configuration"

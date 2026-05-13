@@ -11,3 +11,7 @@ redirect_urls = []
 
 [webhooks]
 api_version = "2025-07"
+
+[discount.metafields.app.function-configuration]
+type = "json"
+name = "Function configuration"

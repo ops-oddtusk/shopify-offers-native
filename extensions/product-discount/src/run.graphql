@@ -4,30 +4,18 @@ query RunInput {
       id
       quantity
       cost {
-        amountPerQuantity {
-          amount
-          currencyCode
-        }
-        compareAtAmountPerQuantity {
-          amount
-          currencyCode
-        }
+        amountPerQuantity { amount currencyCode }
+        compareAtAmountPerQuantity { amount currencyCode }
       }
       merchandise {
         ... on ProductVariant {
           id
-          product {
-            id
-            handle
-            hasAnyTag(tags: ["offer-discount"])
-          }
+          product { id handle hasAnyTag(tags: ["offer-discount"]) }
         }
       }
     }
   }
   discountNode {
-    metafield(namespace: "offer-config", key: "settings") {
-      value
-    }
+    metafield(namespace: "$app", key: "function-configuration") { value }
   }
 }

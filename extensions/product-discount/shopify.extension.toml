@@ -15,5 +15,9 @@ description = "Applies discounts based on compare-at price"
   command = "node build.js"
   path = "dist/function.wasm"
 
+  [extensions.input.variables]
+  namespace = "$app"
+  key = "function-configuration"
+
   [extensions.ui]
-  enable_create = true
+  handle = "discount-settings"
