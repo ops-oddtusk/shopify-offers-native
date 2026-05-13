@@ -4,7 +4,7 @@ type = "function"
 handle = "offer-product-discount"
 
 [build]
-command = "javy emit-plugin -o plugin.wasm && javy build -C dynamic -C plugin=plugin.wasm -o dist/index.wasm src/run.js && rm -f plugin.wasm"
+command = "sh -c 'mkdir -p dist && javy emit-plugin -o plugin.wasm && javy build -C dynamic -C plugin=plugin.wasm -o dist/index.wasm src/run.js && rm -f plugin.wasm'"
 path = "dist/index.wasm"
 watch = ["src/**/*.js"]
 
