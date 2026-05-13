@@ -12,7 +12,7 @@ description = "Applies discounts based on compare-at price"
   export = "run"
 
   [extensions.build]
-  command = ""
+  command = "npx esbuild src/run.js --bundle --outfile=dist/index.js --format=esm --target=esnext"
   path = "dist/function.wasm"
 
   [extensions.ui]
