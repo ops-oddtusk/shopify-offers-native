@@ -1,4 +1,5 @@
 api_version = "2025-07"
+uid = "31221ae9-8d19-d9ff-3bed-d3ccef532dab64ed34f2"
 
 [[extensions]]
 name = "Compare At Discount"

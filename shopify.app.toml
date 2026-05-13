@@ -1,19 +1,8 @@
-# Shopify Offers & Bundles App — Fully Native (No External Hosting)
-# All logic runs via Shopify Functions, Theme Extensions, and Metaobjects
-
 name = "Offers & Bundles Manager"
 client_id = "e603a8fa8cd7c756d6f96d6b92dba29d"
-application_url = "https://admin.shopify.com"
-embedded = true
 
 [access_scopes]
-scopes = "write_products,read_products,write_discounts,read_discounts,read_orders,write_metaobjects,read_metaobjects"
-
-[auth]
-redirect_urls = []
+scopes = "write_products,read_products,write_discounts,read_discounts"
 
 [webhooks]
-api_version = "2024-10"
-
-[pos]
-embedded = false
+api_version = "2025-07"
