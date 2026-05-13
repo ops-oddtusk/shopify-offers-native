@@ -46,7 +46,7 @@ jobs:
             if [ -d "$func_dir/src" ]; then
               echo "=== Building $func_dir ==="
               mkdir -p "$func_dir/dist"
-              javy build -d "$func_dir/src/run.js" -o "$func_dir/dist/function.wasm"
+              javy build "$func_dir/src/run.js" -o "$func_dir/dist/function.wasm"
               ls -lh "$func_dir/dist/function.wasm"
               echo "=== Done ==="
             fi
