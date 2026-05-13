@@ -27,14 +27,11 @@ jobs:
 
       - name: Download Javy compiler
         run: |
-          curl -sL https://github.com/nickabal/nickabal-cli/releases/latest/download/javy-x86_64-linux.gz 2>/dev/null | gunzip > /usr/local/bin/javy 2>/dev/null || true
-          if [ ! -s /usr/local/bin/javy ]; then
-            echo "Trying Shopify fork..."
-            JAVY_URL=$(curl -s https://api.github.com/repos/Shopify/javy/releases/latest | grep browser_download_url | grep linux | head -1 | cut -d'"' -f4)
-            echo "Downloading from: $JAVY_URL"
-            curl -sL "$JAVY_URL" | gunzip > /usr/local/bin/javy
-          fi
-          chmod +x /usr/local/bin/javy
+          curl -L -o javy.gz https://github.com/bytecodealliance/javy/releases/download/v6.0.0/javy-x86_64-linux-v6.0.0.gz || \
+          curl -L -o javy.gz https://github.com/Shopify/javy/releases/download/v6.0.0/javy-x86_64-linux-v6.0.0.gz
+          gunzip javy.gz
+          chmod +x javy
+          sudo mv javy /usr/local/bin/javy
           javy --version
 
       - name: Deploy to Shopify
