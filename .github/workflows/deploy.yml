@@ -17,14 +17,6 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Javy CLI
-        run: |
-          curl -sSfL "https://github.com/bytecodealliance/javy/releases/download/v6.0.0/javy-x86_64-linux-v6.0.0.gz" -o javy.gz
-          gunzip javy.gz
-          chmod +x javy
-          sudo mv javy /usr/local/bin/javy
-          javy --version
-
       - name: Install Shopify CLI
         run: npm install -g @shopify/cli@latest
 

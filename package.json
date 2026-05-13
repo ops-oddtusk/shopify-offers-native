@@ -4,7 +4,8 @@
   "private": true,
   "description": "Shopify-native offers & bundles display app with checkout banner.",
   "workspaces": [
-    "extensions/checkout-banner"
+    "extensions/checkout-banner",
+    "extensions/product-discount"
   ],
   "scripts": {
     "deploy": "shopify app deploy",

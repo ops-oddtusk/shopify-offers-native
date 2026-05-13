@@ -1,29 +1,8 @@
-// @ts-check
-
-/**
- * Offer Product Discount Function
- * Supports 12 discount types with compare-at price option.
- *
- * Config is read from discountNode.metafield (namespace: "offer-config", key: "settings").
- * JSON shape:
- * {
- *   "offer_type": "PERCENTAGE_OFF" | "FIXED_AMOUNT" | "BOGO" | "BUY_X_GET_Y" |
- *                 "VOLUME_TIERED" | "QUANTITY_BREAKS" | "FREE_GIFT" | "SPEND_X_SAVE_Y" |
- *                 "PRODUCT_BUNDLE" | "COLLECTION_BUNDLE" | "MIX_AND_MATCH" | "MIN_QUANTITY",
- *   "pricing_mode": "selling_price" | "compare_at_price",
- *   "discount_value": 15,
- *   "min_quantity": 2,
- *   "tiers": [{ "min_qty": 2, "discount": 10 }, { "min_qty": 5, "discount": 20 }],
- *   "buy_qty": 2,
- *   "get_qty": 1,
- *   "spend_threshold": 100,
- *   "message": "15% off!"
- * }
- */
+import { shopifyFunction } from "@shopify/shopify_function";
 
 var EMPTY = { discountApplicationStrategy: "FIRST", discounts: [] };
 
-function run(input) {
+export default shopifyFunction((input) => {
   var configRaw = input && input.discountNode && input.discountNode.metafield
     ? input.discountNode.metafield.value : null;
   if (!configRaw) return EMPTY;
@@ -51,7 +30,7 @@ function run(input) {
 
   if (discounts.length === 0) return EMPTY;
   return { discountApplicationStrategy: "FIRST", discounts: discounts };
-}
+});
 
 // ── Helpers ──────────────────────────────────────────────
 
